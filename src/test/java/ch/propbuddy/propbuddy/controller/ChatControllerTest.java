@@ -81,7 +81,7 @@ public class ChatControllerTest {
 
         ChatMessage chatMessage = completableFuture.get(10, SECONDS);
 
-        assertNotNull(chatMessage);
+        assertNotNull(aMessage);
         verify(chatServiceMock, times(1)).handleTextMessage(aMessage);
     }
 
@@ -94,7 +94,7 @@ public class ChatControllerTest {
 
         ChatMessage chatMessage = completableFuture.get(10, SECONDS);
 
-        assertNotNull(chatMessage);
+        assertNotNull(aMessage);
         verify(chatServiceMock, times(1)).handleTextMessage(aMessage);
     }
 

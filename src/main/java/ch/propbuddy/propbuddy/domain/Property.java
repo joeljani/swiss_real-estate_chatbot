@@ -1,12 +1,12 @@
 package ch.propbuddy.propbuddy.domain;
 
 public class Property {
-    final String plz;
-    final String address;
-    final String areaSqm;
-    final String rooms;
-    final String price;
-    final String link;
+    private final String plz;
+    private final String address;
+    private final String areaSqm;
+    private final String rooms;
+    private final String price;
+    private final String link;
 
     public Property(String plz, String address, String areaSqm, String rooms, String price, String link) {
         this.plz = plz;

@@ -56,12 +56,11 @@ public class ChatControllerTest {
         completableFuture = new CompletableFuture<>();
         WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createTransportClient()));
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
-        stompSession = stompClient.connect(WS_URL, new StompSessionHandlerAdapter() {
-        }).get(1, SECONDS);
+        stompSession = stompClient.connect(WS_URL, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
     }
 
     @Test
-    public void testAddUser() throws InterruptedException, ExecutionException, TimeoutException {
+    public void testHandleAddUser() throws InterruptedException, ExecutionException, TimeoutException {
         ChatMessage joinMessage = new ChatMessage(ChatMessage.MessageType.JOIN, null, "Joel");
 
         stompSession.subscribe("/topic/public", new CreateStompFrameHandler());
@@ -71,6 +70,32 @@ public class ChatControllerTest {
 
         assertNotNull(chatMessage);
         verify(chatServiceMock, times(1)).handleAddUser(joinMessage);
+    }
+
+    @Test
+    public void testHandleRemoveUser() throws InterruptedException, ExecutionException, TimeoutException {
+        ChatMessage aMessage = new ChatMessage(ChatMessage.MessageType.JOIN, "Hello", "Joel");
+
+        stompSession.subscribe("/topic/public", new CreateStompFrameHandler());
+        stompSession.send("/app/chat.sendMessage", aMessage);
+
+        ChatMessage chatMessage = completableFuture.get(10, SECONDS);
+
+        assertNotNull(chatMessage);
+        verify(chatServiceMock, times(1)).handleTextMessage(aMessage);
+    }
+
+    @Test
+    public void testHandleChatMessage() throws InterruptedException, ExecutionException, TimeoutException {
+        ChatMessage aMessage = new ChatMessage(ChatMessage.MessageType.JOIN, "Hello", "Joel");
+
+        stompSession.subscribe("/topic/public", new CreateStompFrameHandler());
+        stompSession.send("/app/chat.sendMessage", aMessage);
+
+        ChatMessage chatMessage = completableFuture.get(10, SECONDS);
+
+        assertNotNull(chatMessage);
+        verify(chatServiceMock, times(1)).handleTextMessage(aMessage);
     }
 
     private List<Transport> createTransportClient() {

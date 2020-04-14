@@ -12,7 +12,7 @@
     <artifactId>propbuddy</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>propbuddy</name>
-    <description>Chatbot webscraping information about properties</description>
+    <description>Chatbot webscraping information about swiss real estates</description>
 
     <properties>
         <java.version>11</java.version>

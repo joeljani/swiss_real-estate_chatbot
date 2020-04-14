@@ -25,6 +25,7 @@ public class ChatController {
     @SendTo("/topic/public")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
         logger.debug("sendMessage called, chatMessage: {}", chatMessage);
+        chatService.handleTextMessage(chatMessage);
         return chatMessage;
     }
 
@@ -38,9 +39,9 @@ public class ChatController {
 
     @MessageMapping("/chat.removeUser")
     @SendTo("/topic/public")
-    public ChatMessage removeUser(@Payload ChatMessage chatMessage,
-                                  SimpMessageHeaderAccessor headerAccessor) {
+    public ChatMessage removeUser(@Payload ChatMessage chatMessage) {
         logger.debug("removeUser: {}", chatMessage);
+        chatService.handleRemoveUser(chatMessage);
         return chatMessage;
     }
 }

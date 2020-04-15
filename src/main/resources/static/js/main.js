@@ -66,13 +66,17 @@ function onError(error) {
 }
 
 function sendMessage(event) {
-    var messageContent = messageInput.value.trim();
-    if (messageContent && stompClient) {
-        var chatMessage = {
-            sender: username,
-            content: messageInput.value,
-            type: 'CHAT'
-        };
+    const messageContent = messageInput.value.trim();
+    const chatMessage = {
+        sender: username,
+        content: messageInput.value,
+        type: 'CHAT'
+    };
+
+    if(event.submitter.id === "sendToChatbotButton" && stompClient) {
+        stompClient.send("/app/chat.sendMessageToChatBot", {}, JSON.stringify(chatMessage));
+        messageInput.value = '';
+    } else if (messageContent && stompClient) {
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
         messageInput.value = '';
     }

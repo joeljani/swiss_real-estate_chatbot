@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import java.io.IOException;
 
 
 @Controller
@@ -29,6 +29,14 @@ public class ChatController {
         return chatMessage;
     }
 
+    @MessageMapping("/chat.sendMessageToChatBot")
+    @SendTo("/topic/public")
+    public ChatMessage sendMessageToChatBot(@Payload ChatMessage chatMessage) throws IOException {
+        logger.debug("sendMessage called, chatMessage: {}", chatMessage);
+        chatService.handleTextMessageToChatBot(chatMessage);
+        return chatMessage;
+    }
+
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
     public ChatMessage addUser(@Payload ChatMessage chatMessage) {
@@ -44,4 +52,5 @@ public class ChatController {
         chatService.handleRemoveUser(chatMessage);
         return chatMessage;
     }
+
 }

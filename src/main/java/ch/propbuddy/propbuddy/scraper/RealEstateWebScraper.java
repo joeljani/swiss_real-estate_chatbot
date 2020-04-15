@@ -9,16 +9,15 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Service;
 
-public class HomeGateScraper {
-    final static String WEBSITE_URL = "https://www.alle-immobilien.ch/de/mieten/in-";
+@Service
+public class RealEstateWebScraper {
+    final String WEBSITE_URL = "https://www.alle-immobilien.ch/de/mieten/in-";
 
-    public static void main(String[] args) throws IOException {
-        String plz = "8002";
-        String priceFrom = "3000.0";
-        String priceTo = "3500.0";
-        String roomsFrom = "3.0";
-        String roomsTo = "4.0";
+    public List<String> fetchProperties(String plz, String priceFrom, String priceTo, String roomsFrom, String roomsTo )
+            throws IOException {
+
         String URL = WEBSITE_URL+plz+"/preis-"+priceFrom+"-"+priceTo+"/zimmer-"+roomsFrom+"-"+roomsTo+"/";
         Document doc = Jsoup.connect(URL).get();
 
@@ -45,7 +44,6 @@ public class HomeGateScraper {
             } else return null;
         }).collect(Collectors.toList());
 
-        properties.stream().forEach(p -> System.out.println(p.getPrice()));
+        return properties.stream().map(Property::getPrice).collect(Collectors.toList());
     }
-
 }

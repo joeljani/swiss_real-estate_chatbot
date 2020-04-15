@@ -60,7 +60,7 @@ public class Chatbot {
             stompSession.subscribe("/topic/public", sessionHandler);
             connected = true;
             stompSession.send("/app/chat.addUser",
-                    new ChatMessage(ChatMessage.MessageType.JOIN, null, "Chatbot"));
+                    new ChatMessage(ChatMessage.MessageType.JOIN, null, "Chatbot")); //Chatbot enters Chat
         } catch (InterruptedException | ExecutionException e) {
             logger.error("connect exception thrown {}", e.getMessage());
         }
@@ -69,10 +69,10 @@ public class Chatbot {
     /**
      * Greets a new joined user.
      *
-     * @param newPerson name to greet.
+     * @param newUser name to greet.
      */
-    public void greetNewJoinedUser(String newPerson) {
-        sendMessageToChat("Welcome " + newPerson + "!");
+    public void greetNewJoinedUser(String newUser) {
+        sendMessageToChat("Welcome " + newUser + "!");
     }
 
     /**

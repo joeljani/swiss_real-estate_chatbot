@@ -3,11 +3,10 @@ package ch.propbuddy.propbuddy.controller;
 
 import ch.propbuddy.propbuddy.domain.ChatMessage;
 import ch.propbuddy.propbuddy.service.ChatService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -15,6 +14,7 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
@@ -22,25 +22,25 @@ import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
-import javax.websocket.ContainerProvider;
-import javax.websocket.WebSocketContainer;
+import javax.sound.sampled.Port;
 import java.lang.reflect.Type;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 /**
- * Tests the ChatController class
+ * Tests the ChatController
  */
 @RunWith(SpringRunner.class)
+@DirtiesContext
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class ChatControllerTest {
 
@@ -58,6 +58,7 @@ public class ChatControllerTest {
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         stompSession = stompClient.connect(WS_URL, new StompSessionHandlerAdapter() {}).get(1, SECONDS);
     }
+
 
     @Test
     public void testHandleAddUser() throws InterruptedException, ExecutionException, TimeoutException {

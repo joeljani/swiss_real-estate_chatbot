@@ -7,9 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 @Service
@@ -21,10 +22,10 @@ public class ChatService {
     @Autowired
     Chatbot chatbot;
 
+    private final ExecutorService executorService = Executors.newCachedThreadPool();
     private static final Logger logger = LoggerFactory.getLogger(ChatService.class);
 
     public void handleTextMessage(ChatMessage message) {
-        logger.debug("handleTextMessage");
     }
 
     public void handleTextMessageToChatBot(ChatMessage message) throws IOException {
@@ -39,12 +40,18 @@ public class ChatService {
 
     public void handleAddUser(ChatMessage message) {
         if(!message.getSender().equals("Chatbot")) {
-            if(!chatbot.isConnected()) {
-                chatbot.connect();
-            }
-            chatbot.greetNewJoinedUser(message.getSender());
+            executorService.execute(() -> {
+                if (!chatbot.isConnected()) {
+                    try {
+                        chatbot.connect();
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                chatbot.greetNewJoinedUser(message.getSender());
+            });
         }
-        logger.debug("handleAddUser");
     }
 
     public void handleRemoveUser(ChatMessage message) {

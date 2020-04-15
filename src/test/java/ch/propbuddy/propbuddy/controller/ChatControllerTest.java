@@ -66,35 +66,39 @@ public class ChatControllerTest {
         stompSession.subscribe("/topic/public", new CreateStompFrameHandler());
         stompSession.send("/app/chat.addUser", joinMessage);
 
-        ChatMessage chatMessage = completableFuture.get(10, SECONDS);
+        ChatMessage chatMessage = completableFuture.get(5, SECONDS);
+        assertEquals("Joel", chatMessage.getSender());
+        assertEquals(ChatMessage.MessageType.JOIN, chatMessage.getType());
 
-        assertNotNull(chatMessage);
         verify(chatServiceMock, times(1)).handleAddUser(joinMessage);
     }
 
     @Test
     public void testHandleRemoveUser() throws InterruptedException, ExecutionException, TimeoutException {
-        ChatMessage aMessage = new ChatMessage(ChatMessage.MessageType.JOIN, "Hello", "Joel");
+        ChatMessage leaveMessage = new ChatMessage(ChatMessage.MessageType.LEAVE, null, "Joel");
 
         stompSession.subscribe("/topic/public", new CreateStompFrameHandler());
-        stompSession.send("/app/chat.sendMessage", aMessage);
+        stompSession.send("/app/chat.removeUser", leaveMessage);
 
-        ChatMessage chatMessage = completableFuture.get(10, SECONDS);
+        ChatMessage chatMessage = completableFuture.get(5, SECONDS);
+        assertEquals("Joel", chatMessage.getSender());
+        assertEquals(ChatMessage.MessageType.LEAVE, chatMessage.getType());
 
-        assertNotNull(aMessage);
-        verify(chatServiceMock, times(1)).handleTextMessage(aMessage);
+        verify(chatServiceMock, times(1)).handleRemoveUser(leaveMessage);
     }
 
     @Test
     public void testHandleChatMessage() throws InterruptedException, ExecutionException, TimeoutException {
-        ChatMessage aMessage = new ChatMessage(ChatMessage.MessageType.JOIN, "Hello", "Joel");
+        ChatMessage aMessage = new ChatMessage(ChatMessage.MessageType.CHAT, "Hello", "Joel");
 
         stompSession.subscribe("/topic/public", new CreateStompFrameHandler());
         stompSession.send("/app/chat.sendMessage", aMessage);
 
-        ChatMessage chatMessage = completableFuture.get(10, SECONDS);
+        ChatMessage chatMessage = completableFuture.get(5, SECONDS);
+        assertEquals("Joel", chatMessage.getSender());
+        assertEquals("Hello", chatMessage.getContent());
+        assertEquals(ChatMessage.MessageType.CHAT, chatMessage.getType());
 
-        assertNotNull(aMessage);
         verify(chatServiceMock, times(1)).handleTextMessage(aMessage);
     }
 

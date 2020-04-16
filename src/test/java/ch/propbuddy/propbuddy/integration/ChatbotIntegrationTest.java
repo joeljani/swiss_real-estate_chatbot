@@ -77,7 +77,7 @@ public class ChatbotIntegrationTest {
         ChatMessage receivedChatbotWelcomeMessage = blockingQueue.poll(3, SECONDS);
         assert receivedChatbotWelcomeMessage != null;
         assertEquals("Chatbot", receivedChatbotWelcomeMessage.getSender());
-        assertEquals("Welcome " + username + "!", receivedChatbotWelcomeMessage.getContent());
+        assertEquals("Welcome " + username + "! What can i do for you?", receivedChatbotWelcomeMessage.getContent());
     }
 
 

@@ -4,6 +4,8 @@ Inspired by: https://github.com/callicoder/spring-boot-websocket-chat-demo/blob/
 
 'use strict';
 
+//TODO: Refactor whole file
+
 var usernamePage = document.getElementById('username-page');
 var chatPage = document.getElementById('chat-page');
 var usernameForm = document.getElementById('usernameForm');
@@ -12,6 +14,14 @@ var messageInput = document.getElementById('message');
 var messageArea = document.getElementById('messageArea');
 var connectingElement = document.querySelector('.connecting');
 var leaveButton = document.getElementById("leave-button");
+
+/****************** STATE OBJECTS ******************/
+var plzState = "";
+var priceMin = "";
+var priceMax = "";
+var roomsMin = "";
+var roomsMax = "";
+/***********************************************************************************.*/
 
 
 var stompClient = null;
@@ -65,7 +75,7 @@ function onError(error) {
     connectingElement.style.color = 'red';
 }
 
-function sendMessage(event) {
+function sendMessage(id) {
     const messageContent = messageInput.value.trim();
     const chatMessage = {
         sender: username,
@@ -73,14 +83,13 @@ function sendMessage(event) {
         type: 'CHAT'
     };
 
-    if(event.submitter.id === "sendToChatbotButton" && stompClient) {
+    if(id === "sendToChatbotButton" && stompClient) {
         stompClient.send("/app/chat.sendMessageToChatBot", {}, JSON.stringify(chatMessage));
         messageInput.value = '';
     } else if (messageContent && stompClient) {
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
         messageInput.value = '';
     }
-    event.preventDefault();
 }
 
 var checkUserNameOnFirstJoin = true;
@@ -100,12 +109,13 @@ function onMessageReceived(payload) {
         message.content = message.sender + ' has left the chat!';
         createLeaveOrJoinedMessage(message)
     } else if (message.type === 'CHAT') {
-        const chatBotAvatar = createChatBotAvatar();
-        if (message.sender === 'propbuddy') {
-            createChatMessage(message, chatBotAvatar);
+        if (message.sender === 'Chatbot') {
+            createChatMessage(message, createChatBotAvatar());
         } else {
             createChatMessage(message, null);
         }
+    } else if (message.type === 'INFO') {
+        createInfoChatMessage(message, createChatBotAvatar());
     }
 }
 
@@ -124,7 +134,6 @@ function createLeaveOrJoinedMessage(message) {
 }
 
 function createChatMessage(message, chatbotAvatar) {
-
     let messageElement;
     if (chatbotAvatar != null) {
         messageElement = chatbotAvatar;
@@ -138,16 +147,137 @@ function createChatMessage(message, chatbotAvatar) {
         messageElement.appendChild(avatarElement);
     }
 
+    messageElement.appendChild(createUserNameText(message.sender));
+    messageElement.appendChild(createUserMessageElement(message.content));
+
+    messageArea.appendChild(messageElement);
+    messageArea.scrollTop = messageArea.scrollHeight;
+}
+
+function createUserNameText(username) {
     const usernameElement = document.createElement('span');
-    const usernameText = document.createTextNode(message.sender);
+    const usernameText = document.createTextNode(username);
     usernameElement.appendChild(usernameText);
-    messageElement.appendChild(usernameElement);
+    return usernameElement;
+}
 
-    const messageText = document.createTextNode(message.content);
+function createUserMessageElement(message) {
+    const messageText = document.createTextNode(message);
     const textElement = document.createElement('p');
-
     textElement.appendChild(messageText);
-    messageElement.appendChild(textElement);
+    return textElement;
+}
+
+function createChatbotSuggestionsElement(message) {
+    const messageContainer = document.createElement('div');
+    const messages = message.split(",");
+    messages.forEach(m => {
+            const button = document.createElement("button");
+            button.classList.add("suggestionActionButton");
+            button.onclick = () => suggestionActionButtonListener(messageContainer, m);
+            button.innerHTML = m;
+            messageContainer.appendChild(button)
+    })
+    return messageContainer;
+}
+
+function suggestionActionButtonListener(messageContainer, message) {
+    if(message.includes("rent")) {
+        createFilterBox(messageContainer);
+    } else if(message.includes("buy")) {
+        console.log(plzState)
+    }
+}
+
+function createFilterBox(messageContainer) {
+    const filterContainer = document.createElement("div");
+    const plzLabel = document.createElement("label");
+    plzLabel.htmlFor = "plz";
+    plzLabel.innerHTML = "Ort";
+
+    const plzInput = document.createElement("input");
+    plzInput.name = "plz";
+
+    const priceMinlabel = document.createElement("label");
+    const priceMinInput = document.createElement("input");
+
+    const priceMaxLabel = document.createElement("label");
+    const priceMaxInput = document.createElement("input");
+
+    const roomsMinLabel = document.createElement("label");
+    const roomsMinInput = document.createElement("input");
+
+    const roomsMaxLabel = document.createElement("label");
+    const roomsMaxInput = document.createElement("input");
+
+    const submitButton = document.createElement("button");
+    submitButton.type = "submit";
+    submitButton.innerHTML = "Search!";
+    submitButton.onclick = () => sendPropertyInfoMessage();
+
+    plzInput.oninput = event => onInputListenerPLZ(event);
+    priceMinInput.oninput = event => onInputListenerPriceMin(event);
+    priceMaxInput.oninput = event => onInputListenerPriceMax(event);
+    roomsMinInput.oninput = event => onInputListenerRoomsMin(event);
+    roomsMaxInput.oninput = event => onInputListenerRoomsMax(event);
+
+    filterContainer.append(plzLabel, plzInput, priceMinlabel, priceMinInput,
+        priceMaxLabel, priceMaxInput, roomsMinLabel, roomsMinInput, roomsMaxLabel, roomsMaxInput, submitButton);
+
+
+
+    //STYLING
+    for(let i = 0; i < filterContainer.childElementCount; i++) {
+        filterContainer.children[i].classList.add("filterInput");
+    }
+
+
+    messageContainer.appendChild(filterContainer)
+}
+
+function onInputListenerPLZ(event) {
+    plzState = event.target.value;
+    console.log(plzState)
+}
+function onInputListenerPriceMin(event) {
+    priceMin = event.target.value;
+}
+function onInputListenerPriceMax(event) {
+    priceMax = event.target.value;
+}
+function onInputListenerRoomsMin(event) {
+    roomsMin = event.target.value;
+}
+function onInputListenerRoomsMax(event) {
+    roomsMax = event.target.value;
+}
+
+function sendPropertyInfoMessage() {
+    const messageContent = plzState + "," + priceMin + "," + priceMax + "," + roomsMin + "," + roomsMax;
+    const chatMessage = {
+        sender: username,
+        content: messageContent,
+        type: 'CHAT'
+    };
+    stompClient.send("/app/chat.sendMessageToChatBot", {}, JSON.stringify(chatMessage));
+}
+
+function createInfoChatMessage(message, chatbotAvatar) {
+    let messageElement;
+    if (chatbotAvatar != null) {
+        messageElement = chatbotAvatar;
+    } else {
+        messageElement = document.createElement('li');
+        messageElement.classList.add('chat-message');
+        const avatarElement = document.createElement('i');
+        const avatarText = document.createTextNode(message.sender[0]);
+        avatarElement.appendChild(avatarText);
+        avatarElement.style['background-color'] = getAvatarColor(message.sender);
+        messageElement.appendChild(avatarElement);
+    }
+
+    messageElement.appendChild(createUserNameText(message.sender));
+    messageElement.appendChild(createChatbotSuggestionsElement(message.content));
 
     messageArea.appendChild(messageElement);
     messageArea.scrollTop = messageArea.scrollHeight;

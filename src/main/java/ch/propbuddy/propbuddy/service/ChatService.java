@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,7 +32,9 @@ public class ChatService {
     public void handleTextMessageToChatBot(ChatMessage message) throws IOException {
         logger.debug("handleTextMessageToChatBot");
         if(chatbot.isConnected()) {
-            List<String> data = realEstateWebScraper.fetchProperties("8002", "3000.0", "4500.0", "2.0", "4.0");
+            String propertiesFilter = message.getContent();
+            List<String> filters = Arrays.asList(propertiesFilter.split(","));
+            List<String> data = realEstateWebScraper.fetchProperties(filters.get(0), filters.get(1), filters.get(2), filters.get(3), filters.get(4));
             StringBuilder stringBuilder = new StringBuilder();
             data.forEach(stringBuilder::append);
             chatbot.sendMessageToChat(stringBuilder.toString());
@@ -49,7 +52,11 @@ public class ChatService {
                         e.printStackTrace();
                     }
                 }
-                chatbot.greetNewJoinedUser(message.getSender());
+                try {
+                    chatbot.greetNewJoinedUser(message.getSender());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             });
         }
     }

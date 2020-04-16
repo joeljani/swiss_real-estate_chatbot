@@ -2,6 +2,7 @@
 Inspired by https://github.com/callicoder/spring-boot-websocket-chat-demo/blob/master/src/main/resources/static/index.html
 */
 
+
 :root {
     --baseColor: #fefeff;
     --primaryColor: #128ff2;
@@ -29,6 +30,7 @@ body {
     color: #333;
     background-color: var(--baseColor);
     height: 100%;
+    position: relative;
 }
 
 .clearfix:after {
@@ -310,4 +312,8 @@ button.accent {
 
 #sendToChatbotButton {
     width: 10em;
+}
+
+.filterInput {
+    border: blue 1px solid;
 }

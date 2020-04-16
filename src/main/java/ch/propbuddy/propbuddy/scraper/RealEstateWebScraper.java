@@ -16,7 +16,7 @@ public class RealEstateWebScraper {
     final String WEBSITE_URL = "https://www.alle-immobilien.ch/de/mieten/in-";
 
     public List<String> fetchProperties(String plz, String priceFrom, String priceTo, String roomsFrom, String roomsTo )
-            throws IOException {
+            throws IOException, IndexOutOfBoundsException {
 
         String URL = WEBSITE_URL+plz+"/preis-"+priceFrom+"-"+priceTo+"/zimmer-"+roomsFrom+"-"+roomsTo+"/";
         Document doc = Jsoup.connect(URL).get();

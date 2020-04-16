@@ -71,8 +71,10 @@ public class Chatbot {
      *
      * @param newUser name to greet.
      */
-    public void greetNewJoinedUser(String newUser) {
-        sendMessageToChat("Welcome " + newUser + "!");
+    public void greetNewJoinedUser(String newUser) throws InterruptedException {
+        sendMessageToChat("Welcome " + newUser + "! What can i do for you?");
+        Thread.sleep(400); //TODO: Better alternative than thread sleep
+        sendInfoMessageToChat("Search for properties to rent, Search for properties to buy");
     }
 
     /**
@@ -83,5 +85,15 @@ public class Chatbot {
     public synchronized void sendMessageToChat(String message) {
         stompSession.send("/app/chat.sendMessage",
                 new ChatMessage(ChatMessage.MessageType.CHAT, message, "Chatbot"));
+    }
+
+    /**
+     * Send messages from the Chatbot.
+     *
+     * @param message which is send from the Chatbot.
+     */
+    public synchronized void sendInfoMessageToChat(String message) {
+        stompSession.send("/app/chat.sendMessage",
+                new ChatMessage(ChatMessage.MessageType.INFO, message, "Chatbot"));
     }
 }

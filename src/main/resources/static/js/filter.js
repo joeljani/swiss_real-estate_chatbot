@@ -19,7 +19,7 @@ const filter = (() => {
         setPriceMax: newPriceMax => priceMax = newPriceMax,
         setRoomsMin:  newRoomsMin => roomsMin = newRoomsMin,
         setRoomsMax: newRoomsMax => roomsMax = newRoomsMax,
-        getAllValues: () => [PLZ, priceMin, priceMax, roomsMin, roomsMax]
+        getAllValues: () => [PLZ, priceMin, priceMax, roomsMin, roomsMax],
     }
 })();
 

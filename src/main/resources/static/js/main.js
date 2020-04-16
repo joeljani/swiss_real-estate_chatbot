@@ -170,6 +170,10 @@ function createUserMessageElement(message) {
 
 function createChatbotSuggestionsElement(message) {
     const messageContainer = document.createElement('div');
+    const suggestionsText = document.createTextNode('Some suggestions:');
+    const textElement = document.createElement('p');
+    textElement.appendChild(suggestionsText)
+    messageContainer.appendChild(textElement)
     const messages = message.split(",");
     messages.forEach(m => {
             const button = document.createElement("button");
@@ -191,26 +195,34 @@ function suggestionActionButtonListener(messageContainer, message) {
 
 function createFilterBox(messageContainer) {
     const filterContainer = document.createElement("div");
+    filterContainer.classList.add("filterContainer")
     const plzLabel = document.createElement("label");
     plzLabel.htmlFor = "plz";
-    plzLabel.innerHTML = "Ort";
-
+    plzLabel.innerHTML = "PLZ";
     const plzInput = document.createElement("input");
-    plzInput.name = "plz";
 
     const priceMinlabel = document.createElement("label");
+    priceMinlabel.htmlFor = "priceMin";
+    priceMinlabel.innerHTML = "Price Min";
     const priceMinInput = document.createElement("input");
 
     const priceMaxLabel = document.createElement("label");
+    priceMaxLabel.htmlFor = "priceMax";
+    priceMaxLabel.innerHTML = "Price Max";
     const priceMaxInput = document.createElement("input");
 
     const roomsMinLabel = document.createElement("label");
+    roomsMinLabel.htmlFor = "roomsMin";
+    roomsMinLabel.innerHTML = "Rooms Min";
     const roomsMinInput = document.createElement("input");
 
     const roomsMaxLabel = document.createElement("label");
+    roomsMaxLabel.htmlFor = "roomsMax";
+    roomsMaxLabel.innerHTML = "Rooms Max";
     const roomsMaxInput = document.createElement("input");
 
     const submitButton = document.createElement("button");
+    submitButton.classList.add("filterSubmitButton")
     submitButton.type = "submit";
     submitButton.innerHTML = "Search!";
     submitButton.onclick = () => sendPropertyInfoMessage();
@@ -224,15 +236,7 @@ function createFilterBox(messageContainer) {
     filterContainer.append(plzLabel, plzInput, priceMinlabel, priceMinInput,
         priceMaxLabel, priceMaxInput, roomsMinLabel, roomsMinInput, roomsMaxLabel, roomsMaxInput, submitButton);
 
-
-
-    //STYLING
-    for(let i = 0; i < filterContainer.childElementCount; i++) {
-        filterContainer.children[i].classList.add("filterInput");
-    }
-
-
-    messageContainer.appendChild(filterContainer)
+    messageContainer.appendChild(filterContainer);
 }
 
 function onInputListenerPLZ(event) {

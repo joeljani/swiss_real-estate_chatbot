@@ -1,10 +1,7 @@
-/*
-Inspired by: https://github.com/callicoder/spring-boot-websocket-chat-demo/blob/master/src/main/resources/static/index.html
-*/
+import {filter} from './filter.js'
 
 'use strict';
 
-//TODO: Refactor whole file
 
 var usernamePage = document.getElementById('username-page');
 var chatPage = document.getElementById('chat-page');
@@ -14,14 +11,6 @@ var messageInput = document.getElementById('message');
 var messageArea = document.getElementById('messageArea');
 var connectingElement = document.querySelector('.connecting');
 var leaveButton = document.getElementById("leave-button");
-
-/****************** STATE OBJECTS ******************/
-var plzState = "";
-var priceMin = "";
-var priceMax = "";
-var roomsMin = "";
-var roomsMax = "";
-/***********************************************************************************.*/
 
 
 var stompClient = null;
@@ -185,7 +174,7 @@ function suggestionActionButtonListener(messageContainer, message) {
     if(message.includes("rent")) {
         createFilterBox(messageContainer);
     } else if(message.includes("buy")) {
-        console.log(plzState)
+        console.log(filter.getAllValues())
     }
 }
 
@@ -236,24 +225,27 @@ function createFilterBox(messageContainer) {
 }
 
 function onInputListenerPLZ(event) {
-    plzState = event.target.value;
-    console.log(plzState)
+    filter.setPlz(event.target.value);
 }
 function onInputListenerPriceMin(event) {
-    priceMin = event.target.value;
+    filter.setPriceMin(event.target.value);
 }
 function onInputListenerPriceMax(event) {
-    priceMax = event.target.value;
+    filter.setPriceMax(event.target.value);
 }
 function onInputListenerRoomsMin(event) {
-    roomsMin = event.target.value;
+    filter.setRoomsMin(event.target.value);
 }
 function onInputListenerRoomsMax(event) {
-    roomsMax = event.target.value;
+    filter.setRoomsMax(event.target.value);
 }
 
 function sendPropertyInfoMessage() {
-    const messageContent = plzState + "," + priceMin + "," + priceMax + "," + roomsMin + "," + roomsMax;
+    const messageContent = filter.getPLZ() + "," +
+                           filter.getpriceMin() + "," +
+                           filter.getPriceMax() + "," +
+                           filter.getRoomsMin() + "," +
+                           filter.getRoomsMax();
     const chatMessage = {
         sender: username,
         content: messageContent,

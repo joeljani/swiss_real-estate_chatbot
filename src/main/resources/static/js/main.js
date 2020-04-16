@@ -1,23 +1,26 @@
 import {filter} from './filter.js'
+import {component} from "./component.js";
 
 'use strict';
 
 
-var usernamePage = document.getElementById('username-page');
-var chatPage = document.getElementById('chat-page');
-var usernameForm = document.getElementById('usernameForm');
-var messageForm = document.getElementById('messageForm');
-var messageInput = document.getElementById('message');
-var messageArea = document.getElementById('messageArea');
-var connectingElement = document.querySelector('.connecting');
-var leaveButton = document.getElementById("leave-button");
+const usernamePage  = component('username-page');
+const chatPage = component('chat-page');
+const usernameForm = component('usernameForm', 'submit', connect, true);
+const messageForm = component('messageForm', 'submit', sendMessage, true);
+const messageInput = component('message');
+const messageArea = component('messageArea');
+const connectingElement = document.querySelector('.connecting');
+const leaveButton = component('leave-button', 'click', leaveChatOnLeaveButtonClicked);
+const sendMessageButton = component('sendMessageButton', 'click', sendMessage);
+const sendToChatbotButton = component('sendToChatbotButton', 'click', sendMessageToChatbot);
 
 
 var stompClient = null;
 var username = null;
 
 
-var colors = [
+const colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
     '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
 ];
@@ -64,22 +67,30 @@ function onError(error) {
     connectingElement.style.color = 'red';
 }
 
-function sendMessage(id) {
+function sendMessage() {
     const messageContent = messageInput.value.trim();
     const chatMessage = {
         sender: username,
-        content: messageInput.value,
+        content: messageContent,
         type: 'CHAT'
     };
 
-    if(id === "sendToChatbotButton" && stompClient) {
-        stompClient.send("/app/chat.sendMessageToChatBot", {}, JSON.stringify(chatMessage));
-        messageInput.value = '';
-    } else if (messageContent && stompClient) {
-        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
-        messageInput.value = '';
-    }
+    stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+    messageInput.value = '';
+
 }
+
+function sendMessageToChatbot() {
+    const messageContent = messageInput.value.trim();
+    const chatMessage = {
+        sender: username,
+        content: messageContent,
+        type: 'CHAT'
+    };
+    stompClient.send("/app/chat.sendMessageToChatBot", {}, JSON.stringify(chatMessage));
+    messageInput.value = '';
+}
+
 
 var checkUserNameOnFirstJoin = true;
 
@@ -326,7 +337,4 @@ function leaveChatOnWindowClosed() {
     isCalledFromLeaveChatButton = false;
 }
 
-usernameForm.addEventListener('submit', connect, true);
-messageForm.addEventListener('submit', sendMessage, true);
-leaveButton.addEventListener('click', leaveChatOnLeaveButtonClicked);
 window.addEventListener('beforeunload', leaveChatOnWindowClosed);

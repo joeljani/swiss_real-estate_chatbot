@@ -48,8 +48,8 @@ Inspired by:https://github.com/callicoder/spring-boot-websocket-chat-demo/blob/m
                     <input autocomplete="off" class="form-control" id="message"
                            placeholder="Enter a message..."
                            type="text"/>
-                    <button class="primary" id="sendMessageButton" onclick="sendMessage(this.id)">Send</button>
-                    <button class="primary" id="sendToChatbotButton" onclick="sendMessage(this.id)" >Send to Chatbot</button>
+                    <button class="primary" id="sendMessageButton">Send</button>
+                    <button class="primary" id="sendToChatbotButton" >Send to Chatbot</button>
                 </div>
             </div>
         </div>
@@ -58,6 +58,6 @@ Inspired by:https://github.com/callicoder/spring-boot-websocket-chat-demo/blob/m
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-<script src="/js/main.js"></script>
+<script type="module" src="/js/main.js"></script>
 </body>
 </html>

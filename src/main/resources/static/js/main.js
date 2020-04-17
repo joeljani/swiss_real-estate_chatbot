@@ -359,7 +359,7 @@ function leaveChatOnLeaveButtonClicked() {
     location.reload();
 }
 
-/*function leaveChatOnWindowClosed() {
+function leaveChatOnWindowClosed() {
     if (!isCalledFromLeaveChatButton) {
         const chatMessage = {
             sender: username,
@@ -369,6 +369,6 @@ function leaveChatOnLeaveButtonClicked() {
         stompClient.send("/app/chat.removeUser", {}, JSON.stringify(chatMessage));
     }
     isCalledFromLeaveChatButton = false;
-}*/
+}
 
-//window.addEventListener('beforeunload', leaveChatOnWindowClosed);
+window.addEventListener('beforeunload', leaveChatOnWindowClosed);

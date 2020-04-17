@@ -1,10 +1,15 @@
 package ch.propbuddy.propbuddy.scraper;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import ch.propbuddy.propbuddy.domain.Property;
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfWriter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -15,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class RealEstateWebScraper {
     final String WEBSITE_URL = "https://www.alle-immobilien.ch/de/mieten/in-";
 
-    public List<String> fetchProperties(String plz, String priceFrom, String priceTo, String roomsFrom, String roomsTo )
+    public List<Property> fetchProperties(String plz, String priceFrom, String priceTo, String roomsFrom, String roomsTo)
             throws IOException, IndexOutOfBoundsException {
 
         String URL = WEBSITE_URL+plz+"/preis-"+priceFrom+"-"+priceTo+"/zimmer-"+roomsFrom+"-"+roomsTo+"/";
@@ -44,6 +49,54 @@ public class RealEstateWebScraper {
             } else return null;
         }).collect(Collectors.toList());
 
-        return properties.stream().map(Property::getPrice).collect(Collectors.toList());
+        return properties;
+    }
+
+    public String createPDF(String plz, String priceFrom, String priceTo, String roomsFrom, String roomsTo) throws IOException {
+
+        List<Property> props = fetchProperties(plz, priceFrom, priceTo, roomsFrom, roomsTo);
+        com.itextpdf.text.Document pdfDocument = new com.itextpdf.text.Document();
+
+        String uniqueID = UUID.randomUUID().toString();
+        try
+        {
+            PdfWriter writer = PdfWriter.getInstance(pdfDocument,
+                    new FileOutputStream("/Users/joeljani/3.Personal_Projects/immobuddy/PDFServerService/public/PDF/"+uniqueID+".pdf"));
+            pdfDocument.open();
+            com.itextpdf.text.List list = new com.itextpdf.text.List();
+            list.setSymbolIndent(12);
+            list.setListSymbol("\u2022");
+            props.forEach(p -> {
+                try {
+                    list.add(createSinglePropertyEntry(p));
+                } catch (DocumentException e) {
+                    e.printStackTrace();
+                }
+            });
+            pdfDocument.add(list);
+            pdfDocument.add(new Chunk(""));
+            pdfDocument.close();
+            writer.close();
+            return uniqueID;
+        } catch (DocumentException e)
+        {
+            e.printStackTrace();
+        } catch (FileNotFoundException e)
+        {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private ListItem createSinglePropertyEntry(Property p) throws DocumentException {
+        ListItem item = new ListItem();
+        item.add(new Paragraph(p.getAddress()));
+        item.add(new Paragraph(p.getPrice()));
+        Chunk link = new Chunk("Lueg gnauer tiger", FontFactory.getFont(FontFactory.COURIER, 20, Font.ITALIC, new BaseColor(0, 0,
+                255)));
+        link.setUnderline(1, 1);
+        link.setAnchor(p.getLink());
+        item.add(link);
+        return item;
     }
 }

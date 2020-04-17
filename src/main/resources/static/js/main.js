@@ -94,6 +94,7 @@ function sendMessageToChatbot() {
 
 var checkUserNameOnFirstJoin = true;
 
+//TODO: depa anwenden
 function onMessageReceived(payload) {
     const message = JSON.parse(payload.body);
 
@@ -116,8 +117,37 @@ function onMessageReceived(payload) {
         }
     } else if (message.type === 'INFO') {
         createInfoChatMessage(message, createChatBotAvatar());
+    } else if (message.type === 'PDF') {
+        createPDFLink(message, createChatBotAvatar())
     }
 }
+
+function createPDFLink(message, chatbotAvatar) {
+    let messageElement;
+    if (chatbotAvatar != null) {
+        messageElement = chatbotAvatar;
+    } else {
+        messageElement = document.createElement('li');
+        messageElement.classList.add('chat-message');
+        const avatarElement = document.createElement('i');
+        const avatarText = document.createTextNode(message.sender[0]);
+        avatarElement.appendChild(avatarText);
+        avatarElement.style['background-color'] = getAvatarColor(message.sender);
+        messageElement.appendChild(avatarElement);
+    }
+
+    messageElement.appendChild(createUserNameText(message.sender));
+    const messageText = document.createTextNode("Lueged t wohnige a playboys");
+    const pdfLink = document.createElement('a');
+    pdfLink.appendChild(messageText);
+    pdfLink.setAttribute('href', 'http://localhost:3880/'+message.content);
+    pdfLink.setAttribute("target", "_blank")
+    messageElement.appendChild(pdfLink);
+
+    messageArea.appendChild(messageElement);
+    messageArea.scrollTop = messageArea.scrollHeight;
+}
+
 
 function createLeaveOrJoinedMessage(message) {
     const messageElement = document.createElement('li');
@@ -266,7 +296,7 @@ function sendPropertyInfoMessage() {
         content: messageContent,
         type: 'CHAT'
     };
-    stompClient.send("/app/chat.sendMessageToChatBot", {}, JSON.stringify(chatMessage));
+    stompClient.send("/app/chat.sendPropertyInfoToChatBot", {}, JSON.stringify(chatMessage));
 }
 
 function createInfoChatMessage(message, chatbotAvatar) {
@@ -329,7 +359,7 @@ function leaveChatOnLeaveButtonClicked() {
     location.reload();
 }
 
-function leaveChatOnWindowClosed() {
+/*function leaveChatOnWindowClosed() {
     if (!isCalledFromLeaveChatButton) {
         const chatMessage = {
             sender: username,
@@ -339,6 +369,6 @@ function leaveChatOnWindowClosed() {
         stompClient.send("/app/chat.removeUser", {}, JSON.stringify(chatMessage));
     }
     isCalledFromLeaveChatButton = false;
-}
+}*/
 
-window.addEventListener('beforeunload', leaveChatOnWindowClosed);
+//window.addEventListener('beforeunload', leaveChatOnWindowClosed);

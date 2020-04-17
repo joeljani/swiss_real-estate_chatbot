@@ -32,12 +32,15 @@ public class ChatService {
     public void handleTextMessageToChatBot(ChatMessage message) throws IOException {
         logger.debug("handleTextMessageToChatBot");
         if(chatbot.isConnected()) {
+            //TODO: Add Dialogflow integration [Make chatbot smart]
+        }
+    }
+
+    public void handlePropertyInfoMessageToChatbot(ChatMessage message) throws IOException {
+        if(chatbot.isConnected()) {
             String propertiesFilter = message.getContent();
             List<String> filters = Arrays.asList(propertiesFilter.split(","));
-            List<String> data = realEstateWebScraper.fetchProperties(filters.get(0), filters.get(1), filters.get(2), filters.get(3), filters.get(4));
-            StringBuilder stringBuilder = new StringBuilder();
-            data.forEach(stringBuilder::append);
-            chatbot.sendMessageToChat(stringBuilder.toString());
+            chatbot.sendPDFToChat(realEstateWebScraper.createPDF(filters.get(0), filters.get(1), filters.get(2), filters.get(3), filters.get(4)));
         }
     }
 

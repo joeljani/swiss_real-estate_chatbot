@@ -56,6 +56,7 @@ public class ChatMessage {
         CHAT,
         JOIN,
         LEAVE,
-        INFO
+        INFO,
+        PDF
     }
 }

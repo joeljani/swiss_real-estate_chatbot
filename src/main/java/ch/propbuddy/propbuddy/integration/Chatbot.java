@@ -87,6 +87,11 @@ public class Chatbot {
                 new ChatMessage(ChatMessage.MessageType.CHAT, message, "Chatbot"));
     }
 
+    public synchronized void sendPDFToChat(String message) {
+        stompSession.send("/app/chat.sendMessage",
+                new ChatMessage(ChatMessage.MessageType.PDF, message, "Chatbot"));
+    }
+
     /**
      * Send messages from the Chatbot.
      *

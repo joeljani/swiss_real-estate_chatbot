@@ -54,7 +54,7 @@ public class RealEstateWebScraper {
 
     public String createPDF(String plz, String priceFrom, String priceTo, String roomsFrom, String roomsTo) throws IOException {
 
-        List<Property> props = fetchProperties(plz, priceFrom, priceTo, roomsFrom, roomsTo);
+        List<Property> props = fetchProperties(plz, priceFrom+".0", priceTo+".0", roomsFrom+".0", roomsTo+".0");
         com.itextpdf.text.Document pdfDocument = new com.itextpdf.text.Document();
 
         String uniqueID = UUID.randomUUID().toString();

@@ -39,10 +39,9 @@ public class ChatController {
 
     @MessageMapping("/chat.sendPropertyInfoToChatBot")
     @SendTo("/topic/public")
-    public ChatMessage sendPropertyInfoToChatBot(@Payload ChatMessage chatMessage) throws IOException {
+    public void sendPropertyInfoToChatBot(@Payload ChatMessage chatMessage) throws IOException {
         logger.debug("sendMessage called, chatMessage: {}", chatMessage);
         chatService.handlePropertyInfoMessageToChatbot(chatMessage);
-        return chatMessage;
     }
 
     @MessageMapping("/chat.addUser")

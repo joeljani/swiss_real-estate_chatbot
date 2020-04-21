@@ -6,6 +6,7 @@ import ch.propbuddy.propbuddy.service.ChatService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -43,12 +44,14 @@ public class ChatControllerTest {
     @MockBean
     private ChatService chatServiceMock;
 
-    private final String WS_URL = "ws://127.0.0.1:8080/propbuddy";
+    @Value("${server.port}")
+    private int port;
     private CompletableFuture<ChatMessage> completableFuture;
     private StompSession stompSession;
 
     @Before
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
+        String WS_URL = "ws://127.0.0.1:"+port+"/propbuddy";
         completableFuture = new CompletableFuture<>();
         WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createTransportClient()));
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());

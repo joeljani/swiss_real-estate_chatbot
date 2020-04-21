@@ -5,6 +5,7 @@ import ch.propbuddy.propbuddy.domain.ChatMessage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
@@ -35,12 +36,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class ChatbotIntegrationTest {
 
-    private final String WS_URL = "ws://127.0.0.1:8080/propbuddy";
+    @Value("${server.port}")
+    private int port;
     private BlockingQueue<ChatMessage> blockingQueue;
     private StompSession stompSession;
 
     @Before
     public void setup() throws InterruptedException, ExecutionException, TimeoutException {
+        String WS_URL = "ws://127.0.0.1:"+port+"/propbuddy";
         blockingQueue = new LinkedBlockingDeque<>();
         WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(createTransportClient()));
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());

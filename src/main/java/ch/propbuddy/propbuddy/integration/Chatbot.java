@@ -4,6 +4,7 @@ import ch.propbuddy.propbuddy.domain.ChatMessage;
 import ch.propbuddy.propbuddy.util.CustomStompSessionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandler;
@@ -24,6 +25,8 @@ public class Chatbot {
 
     private static final Logger logger = LoggerFactory.getLogger(Chatbot.class);
 
+    @Value("${server.port}")
+    private int port;
     private final WebSocketStompClient stompClient;
     private StompSession stompSession;
     private volatile boolean connected = false;
@@ -55,7 +58,7 @@ public class Chatbot {
     public synchronized void connect() {
         StompSessionHandler sessionHandler = new CustomStompSessionHandler();
         try {
-            stompSession = stompClient.connect("ws://127.0.0.1:8080/propbuddy",
+            stompSession = stompClient.connect("ws://127.0.0.1:"+port+"/propbuddy",
                     sessionHandler).get();
             stompSession.subscribe("/topic/public", sessionHandler);
             connected = true;

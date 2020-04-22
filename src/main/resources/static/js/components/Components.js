@@ -80,7 +80,7 @@ export function createUserMessageElement(message) {
     return textElement;
 }
 
-export function createChatbotSuggestionsElement(message) {
+export function createChatbotSuggestionsElement(message, sendPropertyInfoMessage) {
     const messageContainer = document.createElement('div');
     const suggestionsText = document.createTextNode('Some suggestions:');
     const textElement = document.createElement('p');
@@ -90,22 +90,22 @@ export function createChatbotSuggestionsElement(message) {
     messages.forEach(m => {
         const button = document.createElement("button");
         button.classList.add("suggestionActionButton");
-        button.onclick = () => suggestionActionButtonListener(messageContainer, m);
+        button.onclick = () => suggestionActionButtonListener(messageContainer, m, sendPropertyInfoMessage);
         button.innerHTML = m;
         messageContainer.appendChild(button)
-    })
+    });
     return messageContainer;
 }
 
-export function suggestionActionButtonListener(messageContainer, message) {
+export function suggestionActionButtonListener(messageContainer, message, sendPropertyInfoMessage) {
     if(message.includes("rent")) {
-        createFilterBox(messageContainer);
+        createFilterBox(messageContainer, sendPropertyInfoMessage);
     } else if(message.includes("buy")) {
         console.log(propertyFilter.getAllValues())
     }
 }
 
-export function createFilterBox(messageContainer) {
+export function createFilterBox(messageContainer, sendPropertyInfoMessage) {
     const filterContainer = document.createElement("div");
     filterContainer.classList.add("filterContainer")
     const plzLabel = document.createElement("label");
@@ -113,37 +113,63 @@ export function createFilterBox(messageContainer) {
     plzLabel.innerHTML = "PLZ";
     const plzInput = document.createElement("input");
 
+
+    const priceRange = [...Array(20).keys()].map(i => (i*500).toString());
     const priceMinlabel = document.createElement("label");
     priceMinlabel.htmlFor = "priceMin";
     priceMinlabel.innerHTML = "Price Min";
-    const priceMinInput = document.createElement("input");
+    const priceMinInput = document.createElement("select");
+    priceRange.map(i => {
+        const option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        priceMinInput.appendChild(option);
+    });
 
     const priceMaxLabel = document.createElement("label");
     priceMaxLabel.htmlFor = "priceMax";
     priceMaxLabel.innerHTML = "Price Max";
-    const priceMaxInput = document.createElement("input");
+    const priceMaxInput = document.createElement("select");
+    priceRange.map(i => {
+        const option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        priceMaxInput.appendChild(option);
+    });
 
+    const roomsRange = [...Array(8).keys()].map(i => i.toString()).slice(1);
     const roomsMinLabel = document.createElement("label");
     roomsMinLabel.htmlFor = "roomsMin";
     roomsMinLabel.innerHTML = "Rooms Min";
-    const roomsMinInput = document.createElement("input");
+    const roomsMinInput = document.createElement("select");
+    roomsRange.map(i => {
+        const option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        roomsMinInput.appendChild(option);
+    });
 
     const roomsMaxLabel = document.createElement("label");
     roomsMaxLabel.htmlFor = "roomsMax";
     roomsMaxLabel.innerHTML = "Rooms Max";
-    const roomsMaxInput = document.createElement("input");
+    const roomsMaxInput = document.createElement("select");
+    roomsRange.map(i => {
+        const option = document.createElement("option");
+        option.value = i;
+        option.text = i;
+        roomsMaxInput.appendChild(option);
+    });
 
     const submitButton = document.createElement("button");
-    submitButton.classList.add("filterSubmitButton")
+    submitButton.classList.add("filterSubmitButton");
     submitButton.type = "submit";
     submitButton.innerHTML = "Search!";
-    //submitButton.onclick = () => ChatController.sendPropertyInfoMessage();
+    submitButton.onclick = () => {
+        propertyFilter.setFilter(plzInput.value, priceMinInput.value, priceMaxInput.value, roomsMinInput.value,
+                                 roomsMaxInput.value);
+        sendPropertyInfoMessage();
+    };
 
-    plzInput.oninput = event => propertyFilter.setPlz(event.target.value);
-    priceMinInput.oninput = event => propertyFilter.setPriceMin(event.target.value);
-    priceMaxInput.oninput = event => propertyFilter.setPriceMax(event.target.value);
-    roomsMinInput.oninput = event => propertyFilter.setRoomsMin(event.target.value);
-    roomsMaxInput.oninput = event => propertyFilter.setRoomsMax(event.target.value);
 
     filterContainer.append(plzLabel, plzInput, priceMinlabel, priceMinInput,
         priceMaxLabel, priceMaxInput, roomsMinLabel, roomsMinInput, roomsMaxLabel, roomsMaxInput, submitButton);
@@ -151,7 +177,7 @@ export function createFilterBox(messageContainer) {
     messageContainer.appendChild(filterContainer);
 }
 
-export function createInfoChatMessage(message, messageArea, chatbotAvatar) {
+export function createInfoChatMessage(message, messageArea, chatbotAvatar, sendPropertyInfoMessage) {
     let messageElement;
     if (chatbotAvatar != null) {
         messageElement = chatbotAvatar;
@@ -166,7 +192,7 @@ export function createInfoChatMessage(message, messageArea, chatbotAvatar) {
     }
 
     messageElement.appendChild(createUserNameText(message.sender));
-    messageElement.appendChild(createChatbotSuggestionsElement(message.content));
+    messageElement.appendChild(createChatbotSuggestionsElement(message.content, sendPropertyInfoMessage));
 
     messageArea.appendChild(messageElement);
     messageArea.scrollTop = messageArea.scrollHeight;

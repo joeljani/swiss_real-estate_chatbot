@@ -1,6 +1,7 @@
 package ch.propbuddy.propbuddy.integration;
 
 import ch.propbuddy.propbuddy.domain.ChatMessage;
+import ch.propbuddy.propbuddy.domain.Filter;
 import ch.propbuddy.propbuddy.util.CustomStompSessionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +19,13 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 @Component
-public class Chatbot {
+public final class Chatbot {
 
     private static final Logger logger = LoggerFactory.getLogger(Chatbot.class);
 
@@ -30,6 +34,8 @@ public class Chatbot {
     private final WebSocketStompClient stompClient;
     private StompSession stompSession;
     private volatile boolean connected = false;
+    private Filter currentFilter;
+    ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
     /**
      * Instantiate Chatbot as a websocket stomp client.
@@ -41,7 +47,13 @@ public class Chatbot {
         stompClient = new WebSocketStompClient(transport);
         MappingJackson2MessageConverter mappingJackson2MessageConverter = new MappingJackson2MessageConverter();
         stompClient.setMessageConverter(mappingJackson2MessageConverter);
+        // Start Thread which searches for properties with the current filter set
+        executor.scheduleAtFixedRate(helloRunnable, 0, 10, TimeUnit.SECONDS);
     }
+
+    Runnable helloRunnable = () -> {
+        if(currentFilter != null) System.out.println(currentFilter.toString());;
+    };
 
     /**
      * Shows if Chatbot is connected to the chat.
@@ -63,7 +75,7 @@ public class Chatbot {
             stompSession.subscribe("/topic/public", sessionHandler);
             connected = true;
             stompSession.send("/app/chat.addUser",
-                    new ChatMessage(ChatMessage.MessageType.JOIN, null, "Chatbot")); //Chatbot enters Chat
+                    new ChatMessage(ChatMessage.MessageType.JOIN, "", "Chatbot")); //Chatbot enters Chat
         } catch (InterruptedException | ExecutionException e) {
             logger.error("connect exception thrown {}", e.getMessage());
         }
@@ -93,6 +105,12 @@ public class Chatbot {
     public synchronized void sendPDFToChat(String message) {
         stompSession.send("/app/chat.sendMessage",
                 new ChatMessage(ChatMessage.MessageType.PDF, message, "Chatbot"));
+    }
+
+    public synchronized void setCurrentFilter(Filter newCurrentFilter) {
+        currentFilter = newCurrentFilter;
+        stompSession.send("/app/chat.sendMessage",
+                new ChatMessage(ChatMessage.MessageType.FILTER_CHANGED, currentFilter.toString(), null));
     }
 
     /**

@@ -10,6 +10,9 @@ import {
 } from "./components/Components.js";
 
 
+/**
+ * Handles websocket (SockJS) messages
+ */
 const ChatController = (() => {
 
     let stompClient = null;
@@ -28,9 +31,7 @@ const ChatController = (() => {
     }
 
     function onConnected() {
-        // Subscribe to the Public Topic
         stompClient.subscribe('/topic/public', onMessageReceived);
-        // Tell your username to the server
         stompClient.send("/app/chat.addUser", {},
             JSON.stringify({sender: username, type: 'JOIN'})
         );
@@ -68,6 +69,7 @@ const ChatController = (() => {
 
     function onMessageReceived(payload) {
         const message = JSON.parse(payload.body);
+        console.log(message)
 
         if (checkUserNameOnFirstJoin) {
             username = message.sender;
@@ -88,12 +90,19 @@ const ChatController = (() => {
                 else createChatMessage(message, messageArea,null);
                 break;
             case 'INFO':
-                createInfoChatMessage(message, messageArea, createChatBotAvatar());
+                createInfoChatMessage(message, messageArea, createChatBotAvatar(), sendPropertyInfoMessage);
                 break;
             case 'PDF':
                 createPDFLink(message, messageArea, createChatBotAvatar());
                 break;
+            case 'FILTER_CHANGED':
+                setCurrentFilter(message.content);
         }
+    }
+
+    function setCurrentFilter(messageContent) {
+        const list = messageContent.split(',');
+        propertyFilter.setFilter(list[0], list[1], list[2], list[3], list[4]);
     }
 
     function sendPropertyInfoMessage() {
@@ -173,6 +182,6 @@ const connectingElement = document.querySelector('.connecting');
 const leaveButton = bindEventListenerToElement('leave-button', 'click', ChatController.leaveChatOnLeaveButtonClicked);
 const sendMessageButton = bindEventListenerToElement('sendMessageButton', 'click', ChatController.sendMessage);
 const sendToChatbotButton = bindEventListenerToElement('sendToChatbotButton', 'click', ChatController.sendMessageToChatbot);
+const toggleInformationButton = bindEventListenerToElement('toggle-information', 'click', () => console.log(propertyFilter.getAllValues()))
 
-document.getElementById('message').addEventListener('click', () => console.log(propertyFilter.getAllValues()))
 window.addEventListener('beforeunload', ChatController.leaveChatOnWindowClosed);

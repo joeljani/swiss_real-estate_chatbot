@@ -57,6 +57,7 @@ public class ChatMessage {
         JOIN,
         LEAVE,
         INFO,
-        PDF
+        PDF,
+        FILTER_CHANGED
     }
 }

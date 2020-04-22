@@ -59,5 +59,4 @@ public class ChatController {
         chatService.handleRemoveUser(chatMessage);
         return chatMessage;
     }
-
 }

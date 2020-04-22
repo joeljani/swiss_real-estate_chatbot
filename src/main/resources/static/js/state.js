@@ -1,7 +1,6 @@
 'use strict';
 
-
-const filter = (() => {
+const propertyFilter = (() => {
     let PLZ = "";
     let priceMin = "";
     let priceMax = "";
@@ -23,4 +22,4 @@ const filter = (() => {
     }
 })();
 
-export {filter};
+export {propertyFilter};

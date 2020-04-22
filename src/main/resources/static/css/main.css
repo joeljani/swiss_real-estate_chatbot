@@ -55,7 +55,7 @@ body {
 }
 
 .form-group {
-    margin-bottom: 15px;
+    padding: 1em;
 }
 
 #message {
@@ -117,11 +117,6 @@ button.accent {
     color: #fff;
 }
 
-#leave-button {
-    right: 0;
-    position: absolute;
-}
-
 #username-page {
     text-align: center;
 }
@@ -175,10 +170,6 @@ button.accent {
     overflow-y: scroll;
     padding: 0 20px 0px 20px;
     height: calc(100% - 150px);
-}
-
-#chat-page #messageForm {
-    padding: 20px;
 }
 
 #chat-page ul li {
@@ -243,15 +234,38 @@ button.accent {
 
 
 .chat-header {
-    text-align: center;
+    display: grid;
+    grid-template-columns: 25% 50% 25%;
+    grid-template-rows: 50px;
     padding: 15px;
     border-bottom: 1px solid #ececec;
 }
 
-.chat-header h2 {
+#chat-title {
+    text-align: center;
+    font-size: 1.5em;
     margin: 0;
     font-weight: 500;
 }
+
+#leave-button {
+    color: red;
+    text-align: right;
+}
+
+#leave-button span:hover {
+    cursor: pointer;
+}
+
+#toggle-information {
+
+}
+
+#toggle-information span:hover {
+    cursor: pointer;
+}
+
+
 
 .connecting {
     padding-top: 5px;
@@ -291,14 +305,14 @@ button.accent {
     }
 
     .chat-header {
-        padding: 10px;
+        padding: 10px 10px 0px 10px;
     }
 
     .connecting {
         top: 60px;
     }
 
-    .chat-header h2 {
+    .chat-title  {
         font-size: 1.1em;
     }
 }

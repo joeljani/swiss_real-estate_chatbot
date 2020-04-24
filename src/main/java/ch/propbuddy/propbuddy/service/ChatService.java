@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,6 +52,7 @@ public class ChatService {
     public void handleAddUser(ChatMessage message) {
         if(!message.getSender().equals("Chatbot")) {
             executorService.execute(() -> {
+                //TODO: Add Dialogflow integration [Make chatbot smart]
                 currentUsers.add(message.getSender());
                 if (!chatbot.isConnected()) {
                     try {

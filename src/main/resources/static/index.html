@@ -10,6 +10,7 @@ Inspired by:https://github.com/callicoder/spring-boot-websocket-chat-demo/blob/m
     <title>Propbuddy</title>
     <script crossorigin="anonymous" src="https://kit.fontawesome.com/ab306d3827.js"></script>
     <link href="/css/main.css" rel="stylesheet"/>
+    <link href="/css/pure-css-select-style.css" rel="stylesheet"/>
 </head>
 <body>
 <noscript>
@@ -33,9 +34,9 @@ Inspired by:https://github.com/callicoder/spring-boot-websocket-chat-demo/blob/m
 <div class="hidden" id="chat-page">
     <div class="chat-container">
         <div class="chat-header">
-            <div id="toggle-information"><span>...</span></div>
+            <span id="toggle-information">...</span>
             <div id="chat-title">Propbuddy</div>
-            <div id="leave-button"><span>X</span></div>
+            <div style="text-align: right"><span id="leave-button">X</span></div>
         </div>
 
         <div class="connecting">
@@ -53,6 +54,8 @@ Inspired by:https://github.com/callicoder/spring-boot-websocket-chat-demo/blob/m
                     <button class="primary" id="sendToChatbotButton" >Send to Chatbot</button>
                 </div>
             </div>
+        </div>
+        <div class="modal" id='modal1'>
         </div>
     </div>
 </div>

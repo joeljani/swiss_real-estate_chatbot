@@ -7,6 +7,7 @@ Inspired by https://github.com/callicoder/spring-boot-websocket-chat-demo/blob/m
     --baseColor: #fefeff;
     --primaryColor: #128ff2;
     --red: #e0000d;
+    --box-shadow: 0 1px 11px rgba(0, 0, 0, 0.27)
 }
 
 * {
@@ -50,10 +51,6 @@ body {
     border: 1px solid #c8c8c8;
 }
 
-.red-placeholder::-webkit-input-placeholder {
-    color: var(--red);
-}
-
 .form-group {
     padding: 1em;
 }
@@ -85,7 +82,7 @@ a {
 button {
     box-shadow: none;
     border: 1px solid transparent;
-    font-size: 14px;
+    font-size: 1rem;
     outline: none;
     line-height: 100%;
     white-space: nowrap;
@@ -123,7 +120,7 @@ button.accent {
 
 .username-page-container {
     background: #fff;
-    box-shadow: 0 1px 11px rgba(0, 0, 0, 0.27);
+    box-shadow: var(--box-shadow);
     border-radius: 2px;
     width: 100%;
     max-width: 510px;
@@ -250,10 +247,9 @@ button.accent {
 
 #leave-button {
     color: red;
-    text-align: right;
 }
 
-#leave-button span:hover {
+#leave-button:hover {
     cursor: pointer;
 }
 
@@ -326,12 +322,19 @@ button.accent {
     grid-template-columns: 45% 55%;
     grid-template-rows: auto;
     font-size: 16px;
+    row-gap: 15px;
+    margin: 10px 0 0 5px;
 }
 
-.filterContainer input {
-    background: none;
+.filterContainer label {
+    align-self: center;
+}
+
+.location-input {
+    background: transparent;
     border: none;
-    border-bottom: 1px solid var(--primaryColor);
+    border-radius: 0;
+    border-bottom: 1px solid #000000;
 }
 
 .suggestionActionButton {
@@ -350,4 +353,16 @@ button.accent {
     padding: 5px;
 }
 
+.filterErrorMessageField {
+    background-color: rgba(255, 40, 37, 0.71);
+    border-radius: 2px;
+    color: #730000;
+}
 
+.red-placeHolder::-webkit-input-placeholder {
+    color: rgba(255, 40, 37, 0.71);
+}
+
+.red-placeHolder {
+    border-bottom: 1px solid rgba(255, 40, 37, 0.71);
+}

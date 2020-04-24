@@ -13,7 +13,7 @@ import {
 /**
  * Handles websocket (SockJS) messages
  */
-const ChatController = (() => {
+export const ChatController = (() => {
 
     let stompClient = null;
     let username = null;
@@ -106,11 +106,7 @@ const ChatController = (() => {
     }
 
     function sendPropertyInfoMessage() {
-        const messageContent = propertyFilter.getPLZ() + "," +
-            propertyFilter.getpriceMin() + "," +
-            propertyFilter.getPriceMax() + "," +
-            propertyFilter.getRoomsMin() + "," +
-            propertyFilter.getRoomsMax();
+        const messageContent = propertyFilter.getAllValues().join(',')
         const chatMessage = {
             sender: username,
             content: messageContent,

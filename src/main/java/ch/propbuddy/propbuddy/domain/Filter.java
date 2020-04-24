@@ -18,19 +18,15 @@ public class Filter {
     public String getLocation() {
         return location;
     }
-
     public String getPriceMin() {
         return priceMin;
     }
-
     public String getPriceMax() {
         return priceMax;
     }
-
     public String getRoomsMin() {
         return roomsMin;
     }
-
     public String getRoomsMax() {
         return roomsMax;
     }

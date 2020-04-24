@@ -47,7 +47,7 @@ public final class Chatbot {
         stompClient = new WebSocketStompClient(transport);
         MappingJackson2MessageConverter mappingJackson2MessageConverter = new MappingJackson2MessageConverter();
         stompClient.setMessageConverter(mappingJackson2MessageConverter);
-        // Start Thread which searches for properties with the current filter set
+        // Start seperate thread which searches for properties with the current filter set
         executor.scheduleAtFixedRate(helloRunnable, 0, 10, TimeUnit.SECONDS);
     }
 

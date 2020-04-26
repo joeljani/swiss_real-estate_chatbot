@@ -97,6 +97,9 @@ export const ChatController = (() => {
                 break;
             case 'FILTER_CHANGED':
                 setCurrentFilter(message.content);
+            case 'PDF_PROPS_UPDATED':
+                createPDFLink(message, messageArea, createChatBotAvatar());
+
         }
     }
 

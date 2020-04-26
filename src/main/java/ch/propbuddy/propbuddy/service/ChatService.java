@@ -44,12 +44,12 @@ public class ChatService {
         if(chatbot.isConnected()) {
             List<String> filters = Arrays.asList(message.getContent().split(","));
             Filter currentFilter = new Filter(filters.get(0), filters.get(1), filters.get(2), filters.get(3), filters.get(4));
-            chatbot.sendPDFToChat(realEstateWebScraper.createPDF(filters.get(0), filters.get(1), filters.get(2), filters.get(3), filters.get(4)));
+            chatbot.sendPDFToChat(realEstateWebScraper.createPDF(realEstateWebScraper.fetchProperties(currentFilter.getValues())));
             chatbot.setCurrentFilter(currentFilter);
         }
     }
 
-    public void handleAddUser(ChatMessage message) {
+    public synchronized void handleAddUser(ChatMessage message) {
         if(!message.getSender().equals("Chatbot")) {
             executorService.execute(() -> {
                 //TODO: Add Dialogflow integration [Make chatbot smart]

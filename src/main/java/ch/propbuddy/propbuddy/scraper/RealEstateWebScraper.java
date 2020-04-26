@@ -3,6 +3,7 @@ package ch.propbuddy.propbuddy.scraper;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -14,21 +15,31 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RealEstateWebScraper {
+
+    @Value("${PDFServerPath}")
+    private String PDFServerPath;
+
     final String WEBSITE_URL = "https://www.alle-immobilien.ch/de/mieten/in-";
 
-    public List<Property> fetchProperties(String plz, String priceFrom, String priceTo, String roomsFrom, String roomsTo)
+    public List<Property> fetchProperties(List<String> propertyFilter)
             throws IOException, IndexOutOfBoundsException {
+
+        String plz = propertyFilter.get(0) + ".0";
+        String priceFrom = propertyFilter.get(1) + ".0";
+        String priceTo = propertyFilter.get(2) + ".0";
+        String roomsFrom = propertyFilter.get(3) + ".0";
+        String roomsTo = propertyFilter.get(4) + ".0";
 
         String URL = WEBSITE_URL+plz+"/preis-"+priceFrom+"-"+priceTo+"/zimmer-"+roomsFrom+"-"+roomsTo+"/";
         Document doc = Jsoup.connect(URL).get();
 
         //Display amount of properties found
         Elements propertiesFound = doc.getElementsByClass("search-results__subheadline");
-        System.out.println(propertiesFound.text());
 
         //All Links for every Property
         Element searchResultList = doc.getElementsByClass("search-results__list").get(0);
@@ -52,21 +63,26 @@ public class RealEstateWebScraper {
         return properties;
     }
 
-    public String createPDF(String plz, String priceFrom, String priceTo, String roomsFrom, String roomsTo) throws IOException {
+    /**
+     * Creates a PDF File with the given properties.
+     * @param properties
+     * @return UniqueID which is the name of the PDF File
+     * @throws IOException
+     */
+    public String createPDF(List<Property> properties) throws IOException {
 
-        List<Property> props = fetchProperties(plz, priceFrom+".0", priceTo+".0", roomsFrom+".0", roomsTo+".0");
         com.itextpdf.text.Document pdfDocument = new com.itextpdf.text.Document();
 
         String uniqueID = UUID.randomUUID().toString();
         try
         {
             PdfWriter writer = PdfWriter.getInstance(pdfDocument,
-                    new FileOutputStream("/Users/joeljani/3.Personal_Projects/immobuddy/PDFServerService/public/PDF/"+uniqueID+".pdf"));
+                    new FileOutputStream(PDFServerPath+uniqueID+".pdf"));
             pdfDocument.open();
             com.itextpdf.text.List list = new com.itextpdf.text.List();
             list.setSymbolIndent(12);
             list.setListSymbol("\u2022");
-            props.forEach(p -> {
+            properties.forEach(p -> {
                 try {
                     list.add(createSinglePropertyEntry(p));
                 } catch (DocumentException e) {
@@ -98,5 +114,24 @@ public class RealEstateWebScraper {
         link.setAnchor(p.getLink());
         item.add(link);
         return item;
+    }
+
+    public List<Property> getNewProperties(List<Property> oldList, List<Property> newList) {
+        List<Property> newProperties = new ArrayList<>();
+        for(int i = 0; i < oldList.size(); i++) {
+            if (newList.get(i) != null) {
+                Property p1 = oldList.get(i);
+                Property p2 = newList.get(i);
+                if(!p1.getPlz().equals(p2.getPlz())
+                        && !p1.getPrice().equals(p2.getPrice())
+                        && !p1.getAddress().equals(p2.getAddress())
+                        && !p1.getAreaSqm().equals(p2.getAreaSqm())
+                        && !p1.getRooms().equals(p2.getRooms())
+                        && !p1.getLink().equals(p2.getLink())) {
+                    newProperties.add(p2);
+                }
+            }
+        }
+        return newProperties;
     }
 }

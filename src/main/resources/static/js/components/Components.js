@@ -23,7 +23,12 @@ export function createPDFLink(message, messageArea, chatbotAvatar) {
     }
 
     messageElement.appendChild(createUserNameText(message.sender));
-    const messageText = document.createTextNode("See the properties!");
+    let messageText = "";
+    if(message.type.equals('PDF_PROPS_UPDATED')) {
+        messageText = document.createTextNode("New properties have been found!");
+    } else {
+        messageText = document.createTextNode("See the properties!");
+    }
     const pdfLink = document.createElement('a');
     pdfLink.appendChild(messageText);
     pdfLink.setAttribute('href', 'http://localhost:3880/'+message.content);

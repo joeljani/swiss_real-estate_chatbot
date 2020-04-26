@@ -58,6 +58,7 @@ public class ChatMessage {
         LEAVE,
         INFO,
         PDF,
-        FILTER_CHANGED
+        FILTER_CHANGED,
+        PDF_PROPS_UPDATED
     }
 }

@@ -1,5 +1,9 @@
 package ch.propbuddy.propbuddy.domain;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class Filter {
     private final String location;
     private final String priceMin;
@@ -34,5 +38,10 @@ public class Filter {
     @Override
     public String toString() {
         return location + "," + priceMin + "," + priceMax + "," + roomsMin + "," + roomsMax;
+    }
+
+    public List<String> getValues() {
+        return new ArrayList<>(Arrays.asList(getLocation(), getPriceMin(), getPriceMax(),
+                getRoomsMin(), getRoomsMax()));
     }
 }

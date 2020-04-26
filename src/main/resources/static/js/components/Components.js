@@ -24,14 +24,14 @@ export function createPDFLink(message, messageArea, chatbotAvatar) {
 
     messageElement.appendChild(createUserNameText(message.sender));
     let messageText = "";
-    if(message.type.equals('PDF_PROPS_UPDATED')) {
+    if(message.type === 'PDF_PROPS_UPDATED') {
         messageText = document.createTextNode("New properties have been found!");
     } else {
         messageText = document.createTextNode("See the properties!");
     }
     const pdfLink = document.createElement('a');
     pdfLink.appendChild(messageText);
-    pdfLink.setAttribute('href', 'http://localhost:3880/'+message.content);
+    pdfLink.setAttribute('href', 'http://localhost:3880/'+message.content); //PDF Server
     pdfLink.setAttribute("target", "_blank")
     messageElement.appendChild(pdfLink);
 

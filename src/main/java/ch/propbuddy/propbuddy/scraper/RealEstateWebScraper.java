@@ -21,8 +21,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class RealEstateWebScraper {
 
-    @Value("${PDFServerPath}")
-    private String PDFServerPath;
+    @Value("${PDF_FolderPath}")
+    private String PDF_FolderPath;
 
     final String WEBSITE_URL = "https://www.alle-immobilien.ch/de/mieten/in-";
 
@@ -77,7 +77,7 @@ public class RealEstateWebScraper {
         try
         {
             PdfWriter writer = PdfWriter.getInstance(pdfDocument,
-                    new FileOutputStream(PDFServerPath+uniqueID+".pdf"));
+                    new FileOutputStream(PDF_FolderPath + uniqueID + ".pdf"));
             pdfDocument.open();
             com.itextpdf.text.List list = new com.itextpdf.text.List();
             list.setSymbolIndent(12);

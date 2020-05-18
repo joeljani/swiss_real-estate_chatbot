@@ -8,6 +8,45 @@ const colors = [
     '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
 ];
 
+export function createFoundPropertiesMessage(message, messageArea, chatbotAvatar) {
+    const messageContainer = document.createElement('div');
+    const suggestionsText = document.createTextNode('Some suggestions:');
+    const textElement = document.createElement('p');
+    textElement.appendChild(suggestionsText);
+    messageContainer.appendChild(textElement);
+
+    const pdfLinkID = message.content.substring(message.content.indexOf("PDF:")+4);
+
+    let messageElement;
+    if (chatbotAvatar != null) {
+        messageElement = chatbotAvatar;
+    } else {
+        messageElement = document.createElement('li');
+        messageElement.classList.add('chat-message');
+        const avatarElement = document.createElement('i');
+        const avatarText = document.createTextNode(message.sender[0]);
+        avatarElement.appendChild(avatarText);
+        avatarElement.style['background-color'] = getAvatarColor(message.sender);
+        messageElement.appendChild(avatarElement);
+    }
+
+    messageElement.appendChild(createUserNameText(message.sender));
+    let messageText = "";
+    if(message.type === 'PDF_PROPS_UPDATED') {
+        messageText = document.createTextNode("New properties have been found!");
+    } else {
+        messageText = document.createTextNode("See the properties!");
+    }
+    const pdfLink = document.createElement('a');
+    pdfLink.appendChild(messageText);
+    pdfLink.setAttribute('href', 'http://localhost:3880/'+pdfLinkID); //PDF Server
+    pdfLink.setAttribute("target", "_blank")
+    messageElement.appendChild(pdfLink);
+
+    messageArea.appendChild(messageElement);
+    messageArea.scrollTop = messageArea.scrollHeight;
+}
+
 export function createPDFLink(message, messageArea, chatbotAvatar) {
     let messageElement;
     if (chatbotAvatar != null) {
@@ -92,8 +131,8 @@ export function createChatbotSuggestionsElement(message) {
     const messageContainer = document.createElement('div');
     const suggestionsText = document.createTextNode('Some suggestions:');
     const textElement = document.createElement('p');
-    textElement.appendChild(suggestionsText)
-    messageContainer.appendChild(textElement)
+    textElement.appendChild(suggestionsText);
+    messageContainer.appendChild(textElement);
     const messages = message.split(",");
     messages.forEach(message => {
         const button = document.createElement("button");

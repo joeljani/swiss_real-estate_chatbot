@@ -3,6 +3,7 @@ package ch.propbuddy.propbuddy.integration;
 import ch.propbuddy.propbuddy.domain.ChatMessage;
 import ch.propbuddy.propbuddy.domain.Filter;
 import ch.propbuddy.propbuddy.domain.Property;
+import ch.propbuddy.propbuddy.scraper.PDFService;
 import ch.propbuddy.propbuddy.scraper.RealEstateWebScraper;
 import ch.propbuddy.propbuddy.util.CustomStompSessionHandler;
 import org.slf4j.Logger;
@@ -28,6 +29,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -37,6 +40,9 @@ public final class Chatbot {
 
     @Autowired
     private RealEstateWebScraper webScraper;
+
+    @Autowired
+    private PDFService pdfService;
 
     @Value("${server.port}")
     private int port;
@@ -58,7 +64,7 @@ public final class Chatbot {
         stompClient = new WebSocketStompClient(transport);
         MappingJackson2MessageConverter mappingJackson2MessageConverter = new MappingJackson2MessageConverter();
         stompClient.setMessageConverter(mappingJackson2MessageConverter);
-        executor.scheduleAtFixedRate(helloRunnable, 0, 10, TimeUnit.SECONDS);
+        //executor.scheduleAtFixedRate(helloRunnable, 0, 10, TimeUnit.SECONDS);
     }
 
     /**
@@ -73,9 +79,9 @@ public final class Chatbot {
                 List<Property> newProperties =  webScraper.getNewProperties(currentProperties, fetchedProperties);
                 if(newProperties.size() != 0) {
                     currentProperties = fetchedProperties;
-                    sendPropertiesPDFUpdate(webScraper.createPDF(newProperties));
+                    sendPropertiesPDFUpdate(pdfService.createPDF(newProperties));
                 }
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         };
@@ -118,7 +124,7 @@ public final class Chatbot {
     }
 
     /**
-     * Send messages from the Chatbot.
+     * Send general messages from the Chatbot.
      *
      * @param message which is send from the Chatbot.
      */
@@ -126,6 +132,15 @@ public final class Chatbot {
         stompSession.send("/app/chat.sendMessage",
                 new ChatMessage(ChatMessage.MessageType.CHAT, message, "Chatbot"));
     }
+
+    public synchronized void sendFilterSearchResultToChat(List<Property> properties, String pdfLinkID) {
+        String message = properties.stream().map(p -> p.toString()).collect(Collectors.joining(" ;"));
+        message = message.concat(" ;PDF:"+pdfLinkID);
+        System.out.println(message);
+        stompSession.send("/app/chat.sendMessage",
+                new ChatMessage(ChatMessage.MessageType.PDF, message, "Chatbot"));
+    }
+
 
     public synchronized void sendPDFToChat(String message) {
         stompSession.send("/app/chat.sendMessage",

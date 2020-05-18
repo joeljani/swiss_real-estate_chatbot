@@ -40,4 +40,9 @@ public class Property {
     public String getLink() {
         return link;
     }
+
+    @Override
+    public String toString() {
+        return plz+","+address+","+areaSqm+","+rooms+","+price+","+link;
+    }
 }

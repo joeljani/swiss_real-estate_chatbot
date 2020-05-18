@@ -1,52 +1,66 @@
 package ch.propbuddy.propbuddy.scraper;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import ch.propbuddy.propbuddy.domain.Property;
-import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfWriter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RealEstateWebScraper {
 
-    @Value("${PDF_FolderPath}")
-    private String PDF_FolderPath;
+    private volatile Document doc;
 
     final String WEBSITE_URL = "https://www.alle-immobilien.ch/de/mieten/in-";
 
-    public List<Property> fetchProperties(List<String> propertyFilter)
-            throws IOException, IndexOutOfBoundsException {
+    public synchronized List<Property> fetchProperties(List<String> propertyFilter)
+            throws IOException, IndexOutOfBoundsException, InterruptedException {
+        // Reset Document for each new fetch
+        doc = null;
 
-        String plz = propertyFilter.get(0) + ".0";
-        String priceFrom = propertyFilter.get(1) + ".0";
-        String priceTo = propertyFilter.get(2) + ".0";
-        String roomsFrom = propertyFilter.get(3) + ".0";
-        String roomsTo = propertyFilter.get(4) + ".0";
+        // Initial fetch of website
+        String URL = buildURL(propertyFilter);
+        System.out.println(URL);
+        doc = Jsoup.connect(URL).get();
 
-        String URL = WEBSITE_URL+plz+"/preis-"+priceFrom+"-"+priceTo+"/zimmer-"+roomsFrom+"-"+roomsTo+"/";
-        Document doc = Jsoup.connect(URL).get();
+        int numberOfPages = doc.getElementsByClass("pagination").get(0).childrenSize()-1;
+        CountDownLatch doneFetchigSignal = new CountDownLatch(numberOfPages-1); // Skip first page
 
+        // Loop through pagination of website, start from second page
+        for (int i = 2; i <= numberOfPages; i++) {
+            new JsoupDocumentFetcher(URL+"?pageNum="+i, doneFetchigSignal).run();
+        }
+
+        // Wait till every page of search results got fetched
+        doneFetchigSignal.await();
+        System.out.println(doc);
+        String plz = propertyFilter.get(0);
+        return buildProperties(plz, doc, numberOfPages);
+    }
+
+
+    private List<Property> buildProperties(String plz, Document doc, int numberOfPages) {
         //Display amount of properties found
-        Elements propertiesFound = doc.getElementsByClass("search-results__subheadline");
+        String propertiesFoundText = doc.getElementsByClass("search-results__subheadline").text();
+        int numPropertiesFound = Integer.parseInt(propertiesFoundText.replaceAll("\\D+",""));
+        System.out.println("num props found: " + numPropertiesFound);
 
         //All Links for every Property
         Element searchResultList = doc.getElementsByClass("search-results__list").get(0);
+        for (int i = 1; i < numberOfPages; i++) {
+            searchResultList.appendChild(doc.getElementsByClass("search-results__list").get(i));
+        }
+
         //Filter ads
         List<Element> propertyDIVS = searchResultList.getElementsByTag("a")
-                                                   .stream()
-                                                   .filter(p -> p.childNodeSize() > 1).collect(Collectors.toList());
+                .stream()
+                .filter(p -> p.childNodeSize() > 1).collect(Collectors.toList());
 
         //Create Property objects
         List<Property> properties = propertyDIVS.stream().map(property -> {
@@ -60,61 +74,11 @@ public class RealEstateWebScraper {
             } else return null;
         }).collect(Collectors.toList());
 
+        System.out.println(properties.size());
+
         return properties;
     }
 
-    /**
-     * Creates a PDF File with the given properties.
-     * @param properties
-     * @return UniqueID which is the name of the PDF File
-     * @throws IOException
-     */
-    public String createPDF(List<Property> properties) throws IOException {
-
-        com.itextpdf.text.Document pdfDocument = new com.itextpdf.text.Document();
-
-        String uniqueID = UUID.randomUUID().toString();
-        try
-        {
-            PdfWriter writer = PdfWriter.getInstance(pdfDocument,
-                    new FileOutputStream(PDF_FolderPath + uniqueID + ".pdf"));
-            pdfDocument.open();
-            com.itextpdf.text.List list = new com.itextpdf.text.List();
-            list.setSymbolIndent(12);
-            list.setListSymbol("\u2022");
-            properties.forEach(p -> {
-                try {
-                    list.add(createSinglePropertyEntry(p));
-                } catch (DocumentException e) {
-                    e.printStackTrace();
-                }
-            });
-            pdfDocument.add(list);
-            pdfDocument.add(new Chunk(""));
-            pdfDocument.close();
-            writer.close();
-            return uniqueID;
-        } catch (DocumentException e)
-        {
-            e.printStackTrace();
-        } catch (FileNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private ListItem createSinglePropertyEntry(Property p) throws DocumentException {
-        ListItem item = new ListItem();
-        item.add(new Paragraph(p.getAddress()));
-        item.add(new Paragraph(p.getPrice()));
-        Chunk link = new Chunk("Lueg gnauer tiger", FontFactory.getFont(FontFactory.COURIER, 20, Font.ITALIC, new BaseColor(0, 0,
-                255)));
-        link.setUnderline(1, 1);
-        link.setAnchor(p.getLink());
-        item.add(link);
-        return item;
-    }
 
     public List<Property> getNewProperties(List<Property> oldList, List<Property> newList) {
         List<Property> newProperties = new ArrayList<>();
@@ -133,5 +97,47 @@ public class RealEstateWebScraper {
             }
         }
         return newProperties;
+    }
+
+    private String buildURL(List<String> propertyFilter) {
+        String plz = propertyFilter.get(0) + ".0";
+        String priceFrom = propertyFilter.get(1) + ".0";
+        String priceTo = propertyFilter.get(2) + ".0";
+        String roomsFrom = propertyFilter.get(3) + ".0";
+        String roomsTo = propertyFilter.get(4) + ".0";
+        return WEBSITE_URL+plz+"/preis-"+priceFrom+"-"+priceTo+"/zimmer-"+roomsFrom+"-"+roomsTo+"/";
+    }
+
+    private final class JsoupDocumentFetcher implements Runnable {
+        private final String URL;
+        private CountDownLatch doneFetchigSignal;
+
+        public JsoupDocumentFetcher(String url, CountDownLatch doneFetchigSignal) {
+            this.URL = url;
+            this.doneFetchigSignal = doneFetchigSignal;
+        }
+
+        @Override
+        public void run() {
+            try {
+                appendNextPageDocument();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            doneFetchigSignal.countDown();
+        }
+
+        /**
+         * Appends a new Document, which is the next page of the search results, to the parent document.
+         * @throws IOException
+         */
+        private void appendNextPageDocument() throws IOException {
+            Document nextPageDocument = Jsoup.connect(URL).get();
+            if (nextPageDocument.getElementsByClass("search-results__subheadline").text().equals("")) {
+            } else {
+                System.out.println("appending");
+                doc.appendChild(nextPageDocument);
+            }
+        }
     }
 }

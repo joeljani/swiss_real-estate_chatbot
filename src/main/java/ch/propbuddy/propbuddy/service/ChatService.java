@@ -2,7 +2,9 @@ package ch.propbuddy.propbuddy.service;
 
 import ch.propbuddy.propbuddy.domain.ChatMessage;
 import ch.propbuddy.propbuddy.domain.Filter;
+import ch.propbuddy.propbuddy.domain.Property;
 import ch.propbuddy.propbuddy.integration.Chatbot;
+import ch.propbuddy.propbuddy.scraper.PDFService;
 import ch.propbuddy.propbuddy.scraper.RealEstateWebScraper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,16 +20,18 @@ import java.util.concurrent.Executors;
 
 @Service
 public class ChatService {
+    private static final Logger logger = LoggerFactory.getLogger(ChatService.class);
 
     @Autowired
     RealEstateWebScraper realEstateWebScraper;
 
     @Autowired
+    PDFService pdfService;
+
+    @Autowired
     Chatbot chatbot;
 
     private final ExecutorService executorService = Executors.newCachedThreadPool();
-    private static final Logger logger = LoggerFactory.getLogger(ChatService.class);
-
     private volatile List<String> currentUsers = new CopyOnWriteArrayList<>();
 
     public void handleTextMessage(ChatMessage message) {
@@ -40,11 +44,13 @@ public class ChatService {
         }
     }
 
-    public void handlePropertyInfoMessageToChatbot(ChatMessage message) throws IOException {
+    public void handleFilterSearchMessageToChatbot(ChatMessage message) throws IOException, InterruptedException {
         if(chatbot.isConnected()) {
             List<String> filters = Arrays.asList(message.getContent().split(","));
             Filter currentFilter = new Filter(filters.get(0), filters.get(1), filters.get(2), filters.get(3), filters.get(4));
-            chatbot.sendPDFToChat(realEstateWebScraper.createPDF(realEstateWebScraper.fetchProperties(currentFilter.getValues())));
+            List<Property> properties = realEstateWebScraper.fetchProperties(currentFilter.getValues());
+            String pdfLinkID = pdfService.createPDF(properties);
+            chatbot.sendFilterSearchResultToChat(properties, pdfLinkID);
             chatbot.setCurrentFilter(currentFilter);
         }
     }

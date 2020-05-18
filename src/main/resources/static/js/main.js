@@ -6,7 +6,8 @@ import {
     createChatMessage,
     createInfoChatMessage,
     createLeaveOrJoinedMessage,
-    createPDFLink
+    createPDFLink,
+    createFoundPropertiesMessage
 } from "./components/Components.js";
 
 
@@ -93,7 +94,8 @@ export const ChatController = (() => {
                 createInfoChatMessage(message, messageArea, createChatBotAvatar(), sendPropertyInfoMessage);
                 break;
             case 'PDF':
-                createPDFLink(message, messageArea, createChatBotAvatar());
+                createFoundPropertiesMessage(message, messageArea, createChatBotAvatar());
+                //createPDFLink(message, messageArea, createChatBotAvatar());
                 break;
             case 'FILTER_CHANGED':
                 setCurrentFilter(message.content);
@@ -103,6 +105,8 @@ export const ChatController = (() => {
                 break;
         }
     }
+
+
 
     function setCurrentFilter(messageContent) {
         const list = messageContent.split(',');
